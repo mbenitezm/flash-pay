@@ -7,14 +7,19 @@ const PaymentForm = () => {
   const [saveCard, setSaveCard] = useState(false);
   const [selectedCard, setSelectedCard] = useState(1);
   const [total, setTotal] = useState('0.00');
+  const [subtotal, setSubtotal] = useState('0.00');
   const [isLoading, setIsLoading] = useState(false);
+  const [tipPercentage, setTipPercentage] = useState(10);
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const totalFromUrl = params.get('total');
     if (totalFromUrl) {
-      const formattedTotal = Number(totalFromUrl).toFixed(2);
-      setTotal(formattedTotal);
+      const formattedSubtotal = Number(totalFromUrl).toFixed(2);
+      setSubtotal(formattedSubtotal);
+      const tipAmount = (Number(formattedSubtotal) * (10 / 100));
+      const initialTotal = (Number(formattedSubtotal) + tipAmount).toFixed(2);
+      setTotal(initialTotal);
     }
   }, []);
 
@@ -34,6 +39,13 @@ const PaymentForm = () => {
     setValue('savedCard', cardId.toString());
   };
 
+  const handleTipSelection = (percentage) => {
+    setTipPercentage(percentage);
+    const tipAmount = (Number(subtotal) * (percentage / 100));
+    const newTotal = (Number(subtotal) + tipAmount).toFixed(2);
+    setTotal(newTotal);
+  };
+
   const onSubmit = (data) => {
     console.log(data);
     setIsLoading(true);
@@ -46,12 +58,12 @@ const PaymentForm = () => {
     <div className="min-h-screen bg-gray-900 flex flex-col justify-center">
       <div className="w-full max-w-[400px] mx-auto px-4">
         <div className="bg-gray-800 p-6 sm:p-8 shadow-2xl shadow-blue-500/10 rounded-2xl border border-gray-700">
-          <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-            <div className="min-h-[320px]">
+          <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
+            <div className="min-h-[280px]">
               <div className="flex items-center justify-between mb-8">
                 <h2 className="text-xl sm:text-2xl font-bold text-white">Payment Details</h2>
                 <div className="text-base sm:text-lg">
-                  <span className="font-bold text-blue-400">${total}</span>
+                  <span className="font-bold text-blue-400">${subtotal}</span>
                 </div>
               </div>
 
@@ -209,6 +221,38 @@ const PaymentForm = () => {
               )}
             </div>
 
+            {/* Tip Section */}
+            <div className="space-y-3 border-t border-gray-700 pt-6 mt-4">
+              <div className="flex items-center justify-between">
+                <h3 className="text-sm font-medium text-gray-200">Add a tip</h3>
+                <span className="text-sm text-gray-400">
+                  {tipPercentage > 0 ? `$${(Number(subtotal) * (tipPercentage / 100)).toFixed(2)}` : '-'}
+                </span>
+              </div>
+              
+              <div className="grid grid-cols-3 gap-3">
+                {[10, 15, 20].map((percentage) => (
+                  <button
+                    key={percentage}
+                    type="button"
+                    onClick={() => handleTipSelection(percentage)}
+                    className={`py-2 px-4 rounded-lg text-sm font-medium transition-all
+                      ${tipPercentage === percentage
+                        ? 'bg-blue-500/10 border border-blue-500 text-blue-400'
+                        : 'bg-gray-700 border border-gray-600 text-gray-300 hover:border-gray-500'
+                      }`}
+                  >
+                    {percentage}%
+                  </button>
+                ))}
+              </div>
+
+              <div className="flex items-center justify-between pt-3">
+                <span className="text-sm font-medium text-gray-200">Total</span>
+                <span className="text-lg font-bold text-blue-400">${total}</span>
+              </div>
+            </div>
+
             <button
               type="submit"
               disabled={isLoading}
@@ -216,7 +260,7 @@ const PaymentForm = () => {
                 ${isLoading 
                   ? 'bg-blue-500/50 cursor-not-allowed opacity-75'
                   : 'bg-blue-600 hover:bg-blue-700'} 
-                transition-colors relative`}
+                transition-colors relative mt-2`}
             >
               {isLoading ? (
                 <>
