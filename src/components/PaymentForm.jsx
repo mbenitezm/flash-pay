@@ -1,8 +1,10 @@
 import { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { CreditCardIcon, KeyIcon } from '@heroicons/react/24/outline';
+import { useNavigate } from 'react-router-dom';
 
 const PaymentForm = () => {
+  const navigate = useNavigate();
   const [useSavedCard, setUseSavedCard] = useState(true);
   const [saveCard, setSaveCard] = useState(false);
   const [selectedCard, setSelectedCard] = useState(1);
@@ -50,7 +52,7 @@ const PaymentForm = () => {
     console.log(data);
     setIsLoading(true);
     setTimeout(() => {
-      window.location.href = '/transaction-complete';
+      navigate('/transaction-complete');
     }, 2000);
   };
 
